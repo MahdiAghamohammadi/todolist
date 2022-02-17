@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ItemRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 use App\Models\Item;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use \App\Http\Resources\Item as ItemResource;
 
@@ -18,8 +16,7 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $items = Item::orderBy('created_at', 'DESC')->get();
-        return ItemResource::collection($items);
+        return Item::orderBy('created_at', 'DESC')->get();
     }
 
     /**
@@ -38,9 +35,10 @@ class ItemController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ItemRequest $request)
+    public function store(Request $request)
     {
         $inputs = $request->all();
+        $inputs['name'] = $request->item['name'];
         $item = Item::create($inputs);
         return new ItemResource($item);
     }
@@ -74,18 +72,18 @@ class ItemController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ItemRequest $request, Item $item)
+    public function update(Request $request, Item $item)
     {
         $inputs = $request->all();
         if ($item) {
-            $item->completed = $inputs["completed"] ? true : false;
-            $item->completed_at = $inputs["completed"] ? Carbon::now() : null;
+            $item->completed = $request->item['completed'] ? true : false;
+            $item->completed_at = $request->item['completed'] ? Carbon::now() : null;
             $item->update($inputs);
             return new ItemResource($item);
         } else {
             return response([
                 'data' => "item not found",
-                'status' => 'error'
+                'status' => 'error',
             ]);
         }
     }
@@ -99,11 +97,11 @@ class ItemController extends Controller
     public function destroy(Item $item)
     {
 //        if ($item) {
-//            $item->delete();
-//            return "Item successfully deleted";
-//        } else {
-//            return $this->respondNotFound("Item not found");
-//        }
+        //            $item->delete();
+        //            return "Item successfully deleted";
+        //        } else {
+        //            return $this->respondNotFound("Item not found");
+        //        }
 
         if ($item) {
             $item->delete();
@@ -111,7 +109,7 @@ class ItemController extends Controller
         } else {
             return response([
                 'data' => "item not found",
-                'status' => 'error'
+                'status' => 'error',
             ]);
         }
     }
